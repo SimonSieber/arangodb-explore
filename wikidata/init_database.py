@@ -1,24 +1,16 @@
-from arango import ArangoClient
 import pandas as pd
 from tqdm import tqdm
 
-
-WORKING_DB = "NetZeroNet"
-client = ArangoClient(hosts="http://localhost:8529")
-DB = client.db(WORKING_DB, username="root", password="example")
+import configuration
+from database.accessor import ArangoAccessor
 
 
-def create_database():
-    sys_db = client.db("_system", username="root", password="example")
-    sys_db.create_database(WORKING_DB)
-
-
-def get_db(db_name: str):
-    return client.db(db_name, username="root", password="example")
-
-
-def create_collection(coll_name: str, edge=False):
-    DB.create_collection(coll_name, edge=edge)
+client = ArangoAccessor(
+    db_name="wikidata",
+    host=configuration.ARANGO_HOST,
+    username=configuration.ARANGO_USERNAME,
+    password=configuration.ARANGO_PASSWORD,
+)
 
 
 def read_rel_prop_labels():
@@ -31,9 +23,9 @@ def read_rel_prop_labels():
 
 def create_collections():
     props = read_rel_prop_labels()
-    create_collection("Entities")
+    client.create_collection("Entities")
     for prop in tqdm(props):
-        create_collection(prop, edge=True)
+        client.create_collection(prop, edge=True)
 
 
 def create_graph():
@@ -46,4 +38,10 @@ def create_graph():
         }
         for prop in props
     ]
-    DB.create_graph(name="graph_all_relations", edge_definitions=edge_definitions)
+    client.db.create_graph(name="graph_all_relations", edge_definitions=edge_definitions)
+
+
+if __name__ == "__main__":
+    client.create_database()
+    create_collections()
+    create_graph()

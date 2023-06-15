@@ -156,7 +156,7 @@ class WikidataParser:
         }
         return item
 
-    def __call__(self, filename):
+    def __call__(self, filename: str):
         payload = self.load_json(filename)
         entity = self.unpack_entity(payload)
         entity = self.to_triplets(entity)

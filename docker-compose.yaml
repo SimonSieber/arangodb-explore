@@ -2,7 +2,7 @@ services:
   arangodb:
     image: arangodb:3.10
     environment:
-      ARANGO_ROOT_PASSWORD: example
+      ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD}
 #     volumes:
 #       - arango-volume:/var/lib/arangodb3
     ports:

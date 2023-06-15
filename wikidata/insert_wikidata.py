@@ -1,23 +1,20 @@
 import os
 from pathlib import Path
 
-from arango import ArangoClient
 from tqdm import tqdm
 
+import configuration
 from wikidata.parser import WikidataParser
+from database.accessor import ArangoAccessor
 
 
 parser = WikidataParser()
-
-WORKING_DB = "NetZeroNet"
-client = ArangoClient(hosts="http://localhost:8529")
-
-
-def get_db(db_name: str):
-    return client.db(db_name, username="root", password="example")
-
-
-db = get_db("NetZeroNet")
+client = ArangoAccessor(
+    db_name="wikidata",
+    host=configuration.ARANGO_HOST,
+    username=configuration.ARANGO_USERNAME,
+    password=configuration.ARANGO_PASSWORD,
+)
 
 
 def accessor_insert(file):
@@ -26,15 +23,18 @@ def accessor_insert(file):
     node = entity["source_node"].to_arango_document()
     relationships = [x.to_arango_edge() for x in entity["relations"]]
 
-    db.collection("Entities").insert(node, overwrite_mode="replace")
+    client.db.collection("Entities").insert(node, overwrite_mode="replace")
 
     for relationship in relationships:
-        db.collection(relationship["id"]).insert(relationship, overwrite_mode="replace")
+        client.db.collection(relationship["id"]).insert(relationship, overwrite_mode="replace")
 
 
 def insert_items():
-    SOURCE_PATH = Path(os.path.join(Path().home(), "Documents/wikidata_sp500_entities_json"))
-    SOURCE_FILES = sorted(list(SOURCE_PATH.glob("*.json")))
-    # files = [Path(os.path.join(Path().home(), "Documents/wikidata_sp500_entities_json/Q1.json"))]
-    for file in tqdm(SOURCE_FILES):
+    source_path = Path(os.path.join(Path().home(), "Documents/wikidata_sp500_entities_json"))
+    source_files = sorted(list(source_path.glob("*.json")))
+    for file in tqdm(source_files):
         accessor_insert(file)
+
+
+if __name__ == "__main__":
+    insert_items()
