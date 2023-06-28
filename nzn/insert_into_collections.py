@@ -16,11 +16,12 @@ client = ArangoAccessor(
     password=configuration.ARANGO_PASSWORD,
 )
 
-FILE_PATH = Path(os.path.join(Path.home(), "PycharmProjects/arangodb-expore/data/"))
+FILE_PATH = Path("../data/")
 
 
 def read_parse_company_nodes():
     df = pd.read_excel(os.path.join(FILE_PATH, "asset_owners_company.xlsx"), dtype=str)
+    df["id"] = df["ownaha_company_id"]
     df = df.to_dict(orient="records")
     data = [Node(d).to_arango_document() for d in df]
     return data
@@ -47,7 +48,7 @@ def read_parse_reports():
 def read_parse_report_company_edges():
     df = pd.read_excel(
         os.path.join(FILE_PATH, "reports.xlsx"),
-        usecols=["id", "company_id"],
+        usecols=["id", "ownaha_company_id"],
         dtype=str,
     )
     df = df.to_dict(orient="records")
@@ -55,14 +56,14 @@ def read_parse_report_company_edges():
         Relationship(
             relationship_type=desc.REL_PUBLISHED_BY,
             from_node=dict(type=desc.NODE_REPORT, id=d["id"]),
-            to_node=dict(type=desc.NODE_COMPANY, id=d["company_id"]),
+            to_node=dict(type=desc.NODE_COMPANY, id=d["ownaha_company_id"]),
         ).to_arango_edge()
         for d in df
     ]
     publishes = [
         Relationship(
             relationship_type=desc.REL_PUBLISHES,
-            from_node=dict(type=desc.NODE_COMPANY, id=d["company_id"]),
+            from_node=dict(type=desc.NODE_COMPANY, id=d["ownaha_company_id"]),
             to_node=dict(type=desc.NODE_REPORT, id=d["id"]),
         ).to_arango_edge()
         for d in df

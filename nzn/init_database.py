@@ -3,6 +3,7 @@ import database.schemas as schemas
 import configuration
 import nzn.collection_descriptions as desc
 
+
 client = ArangoAccessor(
     db_name="NetZeroNet",
     host=configuration.ARANGO_HOST,

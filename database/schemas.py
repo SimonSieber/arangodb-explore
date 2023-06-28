@@ -2,6 +2,7 @@ NODE_COMPANY = {
     "rule": {
         "properties": {
             "id": {"type": "string"},
+            "ownaha_company_id": {"type": "string"},
             "name": {"type": "string"},
             "country": {"type": "string"},
             "permid": {"type": "string"},

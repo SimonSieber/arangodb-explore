@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# CUR_DATE=$(date +%Y-%m-%d)
-CUR_DATE="2022-01-01"
+CUR_DATE=$(date +%Y-%m-%d)
 
 # Prepare environment
 shopt -s expand_aliases
