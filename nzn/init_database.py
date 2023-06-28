@@ -1,55 +1,26 @@
-from arango import ArangoClient
-import pandas as pd
-from tqdm import tqdm
+from database.accessor import ArangoAccessor
+import database.schemas as schemas
+import configuration
+import nzn.collection_descriptions as desc
+
+client = ArangoAccessor(
+    db_name="NetZeroNet",
+    host=configuration.ARANGO_HOST,
+    username=configuration.ARANGO_USERNAME,
+    password=configuration.ARANGO_PASSWORD,
+)
+
+nodes = [
+    {"type": desc.NODE_COMPANY, "schema": schemas.NODE_COMPANY},
+    {"type": desc.NODE_REPORT, "schema": schemas.NODE_REPORT},
+    {"type": desc.NODE_NET_ZERO_TARGET, "schema": schemas.NODE_NET_ZERO_TARGET},
+]
+edges = [desc.REL_PUBLISHES, desc.REL_PUBLISHED_BY, desc.REL_DEFINED_IN, desc.REL_DEFINES]
 
 
-WORKING_DB = "NetZeroNet"
-client = ArangoClient(hosts="http://localhost:8529")
-DB = client.db(WORKING_DB, username="root", password="example")
-
-
-def create_database():
-    sys_db = client.db("_system", username="root", password="example")
-    sys_db.create_database(WORKING_DB)
-
-
-def get_db(db_name: str):
-    return client.db(db_name, username="root", password="example")
-
-
-nodes = ["pension_fund"]
-edges = []
-
-
-def _create_collection(coll_name: str, edge=False):
-    DB.create_collection(coll_name, edge=edge)
-
-
-def create_node_collections():
+if __name__ == "__main__":
+    client.create_database()
     for node in nodes:
-        _create_collection(node)
-
-
-def create_edge_collections():
+        client.create_collection(node["type"], schema=node.get("schema"))
     for edge in edges:
-        _create_collection(edge, True)
-
-
-# def create_edge_collections():
-#     props = read_rel_prop_labels()
-#     create_collection("Entities")
-#     for prop in tqdm(props):
-#         create_collection(prop, edge=True)
-#
-#
-# def create_graph():
-#     props = read_rel_prop_labels()
-#     edge_definitions = [
-#         {
-#             "edge_collection": prop,
-#             "from_vertex_collections": ["Entities"],
-#             "to_vertex_collections": ["Entities"],
-#         }
-#         for prop in props
-#     ]
-#     DB.create_graph(name="graph_all_relations", edge_definitions=edge_definitions)
+        client.create_collection(edge, edge=True)

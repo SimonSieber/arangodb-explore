@@ -12,15 +12,21 @@ class Node:
 
 
 class Relationship:
-    def __init__(self, relationship_type, properties, from_node, to_node):
+    def __init__(
+        self,
+        relationship_type: str,
+        from_node: dict,
+        to_node: dict,
+        properties: dict = None,
+    ):
         self.relationship_type = relationship_type
-        self.properties = properties
+        self.properties = properties if properties else {}
         self.from_node = from_node
         self.to_node = to_node
 
     def to_arango_edge(self):
         edge = self.properties.copy()
-        edge["_key"] = f"{self.from_node}-{self.relationship_type}-{self.to_node}"
-        edge["_from"] = f"Entities/{self.from_node}"
-        edge["_to"] = f"Entities/{self.to_node}"
+        edge["_key"] = f"{self.from_node['id']}-{self.relationship_type}-{self.to_node['id']}"
+        edge["_from"] = f"{self.from_node['type']}/{self.from_node['id']}"
+        edge["_to"] = f"{self.to_node['type']}/{self.to_node['id']}"
         return edge
